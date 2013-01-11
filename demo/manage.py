@@ -3,7 +3,10 @@ import os
 import sys
 
 manage_path = os.path.abspath(os.path.dirname(__file__))
-sys.path.insert(0, os.path.abspath(os.path.join(manage_path, "..")))
+project_path = os.path.abspath(os.path.join(manage_path, ".."))
+libs_path = os.path.join(project_path, "libs")
+sys.path.insert(0, project_path)
+sys.path.insert(0, libs_path)
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "demo.settings")

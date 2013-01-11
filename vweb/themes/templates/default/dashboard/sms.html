@@ -40,17 +40,23 @@
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane active in">
-				<form action="" class="form-horizontal">
+				<form action="send" method="post" class="form-horizontal">
+					{% csrf_token %}
 					<div class="control-group">
 						<label for="numbers" class="control-label">手机号码</label>
 						<div class="controls">
-							<textarea id="numbers" name="numbers" rows="3" class="input-xlarge"></textarea>
+							<textarea id="numbers" name="numbers" rows="3" class="input-xxlarge"></textarea>
 						</div>
 					</div>
 					<div class="control-group">
 						<label for="content" class="control-label">短信内容</label>
 						<div class="controls">
-							<textarea id="content" name="content" rows="3" class="input-xlarge"></textarea>
+							<textarea id="content" name="content" rows="3" class="input-xxlarge"></textarea>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							<button type="submit" class="btn btn-primary">发送</button>
 						</div>
 					</div>
 				</form>
