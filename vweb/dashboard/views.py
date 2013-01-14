@@ -1,5 +1,7 @@
-import datetime
+import re
+from datetime import datetime
 
+from django.core import serializers
 from django.forms.models import modelform_factory
 from django import forms
 from django.forms import widgets
@@ -8,8 +10,10 @@ from django.forms.util import flatatt
 from django.utils.html import conditional_escape
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.http import HttpResponse
 
 from vweb.utils.views import View
+from vweb.utils.serialize import tojson, model_to_dict
 from vweb.sms.models import SMSLog, SMSContent
 
 class Login(View):
@@ -35,31 +39,24 @@ class SMSSendForm(forms.Form):
     phones = forms.CharField(label=_("phone"), widget=Textarea)
     content = forms.CharField(label=_("content"), widget=Textarea)
     priority = forms.ChoiceField(label=_("priority"), initial=SMSLog.NORMAL, choices=SMSLog.PRIORITY_CHOICES)
-    request_at = forms.DateTimeField(label=_("request at"), initial=datetime.datetime.now)
+    request_at = forms.DateTimeField(label=_("request at"), initial=datetime.now)
 
     def clean_phones(self):
-        return self.cleaned_data['phones'].split(",")
+        return re.split('[^0-9\-]+', self.cleaned_data["phones"])
 
-class SMS(View):
-    template_name = "dashboard/sms.html"
+class SMSList(View):
+    template_name = "dashboard/sms_list.html"
 
     def get_context_data(self, **kwargs):
-        form = SMSSendForm()
+        smslist = SMSLog.objects.all().order_by("status", "-request_at", "priority")
         return {
-            "form": form,
+            "smslist": smslist
         }
 
 class SMSSend(View):
     template_name = "dashboard/sms_send.html"
 
-    def get_context_data(self, **kwargs):
-        form = SMSSendForm(request.POST)
-        return {
-            "form": form,
-        }
-
     def post(self, request):
-        from django.http import HttpResponse
         form = SMSSendForm(request.POST)
         if form.is_valid():
             content = SMSContent(content=form.cleaned_data["content"])
@@ -76,4 +73,27 @@ class SMSSend(View):
             return HttpResponse("OK")
         else:
             return HttpResponse(form.errors)
+
+class SMSPull(View):
+    def get(self, request):
+        max_count = int(request.GET.get("max_count", 10))
+        sms = SMSLog.objects.select_related().filter(
+            status=SMSLog.REQUEST, request_at__lte=datetime.now()
+        ).order_by(
+            'priority', 'request_at'
+        )[:max_count]
+        resp = tojson([model_to_dict(m, ["id", "phone", "content.content"]) for m in sms])
+        for s in sms:
+            s.status = SMSLog.SENDING
+            s.save()
+        return HttpResponse(resp)
+
+class SMSSended(View):
+    def post(self, request):
+        sms = json.loads(request.POST["sms"])
+        for s in sms:
+            model = SMSLog.objects.get(pk=s.id)
+            model.status = SMSLog.SUCCESS
+            model.save()
+        return HttpResponse("OK")
 

@@ -1,0 +1,79 @@
+{% extends "default/dashboard/base.html" %}
+
+{% block sidebar %}
+<div class="sidebar-nav">
+	<form class="search form-inline">
+		<input type="text" placeholder="Search...">
+	</form>
+	<a href="#dashboard-menu" class="nav-header" data-toggle="collapse"><i class="icon-user-md"></i>帐户管理</a>
+	<ul id="dashboard-menu" class="nav nav-list collapse in">
+		<li><a href="user">用户</a></li>
+		<li ><a href="role">角色</a></li>
+	</ul>
+	<a href="sms" class="nav-header"><i class="icon-envelope"></i>短信管理</a>
+</div>
+{% endblock %}
+
+{% block content_header %}
+<div class="header">
+	<h1 class="page-title">短信管理</h1>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+<ul class="breadcrumb">
+	<li><a href="index.html">首页</a> <span class="divider">/</span></li>
+	<li class="active">短信管理</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="row-fluid">
+	<div class="well">
+		<ul class="nav nav-tabs">
+			<li>
+				<a href="send">发送短信</a>
+			</li>
+			<li class="active">
+				<a href="list">短信日志</a>
+			</li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active in">
+				<div class="well">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>#</th>
+								<th>#</th>
+								<th>#</th>
+								<th>#</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for sms in smslist %}
+							<tr>
+								<td>{{ sms.id }}</td>
+								<td>{{ sms.status }}</td>
+								<td>{{ sms.content }}</td>
+								<td>{{ sms.send_at }}</td>
+								<td>{{ sms.request_at }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<footer>
+	<hr>
+	<p class="pull-right"><a href="http://www.portnine.com/bootstrap-themes" target="_blank">vweb cms system</a> by <a href="http://www.vuuvv.com" target="_blank">vuuvv</a></p>
+	<p>&copy; 2013 <a href="http://www.vuuvv.com" target="_blank">vweb</a></p>
+</footer>
+{% endblock %}

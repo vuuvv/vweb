@@ -1,14 +1,19 @@
+from datetime import datetime
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 class SMSContent(models.Model):
     content = models.TextField(_("content"))
 
+    def __unicode__(self):
+        return u"%s" % self.content
+
 class SMSLog(models.Model):
-    REQUEST = 'REQUEST'
-    SENDING = 'SENDING'
-    FAILED = 'FAILED'
-    SUCCESS = 'SUCCESS'
+    REQUEST = 1
+    SENDING = 2
+    FAILED = 3
+    SUCCESS = 4
     STATUS_CHOICES = (
         (REQUEST, _("Request")),
         (SENDING, _("Sending")),
@@ -27,7 +32,8 @@ class SMSLog(models.Model):
 
     phone = models.CharField(_("phone"), max_length=255)
     content = models.ForeignKey(SMSContent, verbose_name=_("content"))
-    status = models.CharField(_("status"), max_length=255, choices=STATUS_CHOICES)
+    status = models.IntegerField(_("status"), choices=STATUS_CHOICES)
     priority = models.IntegerField(_("priority"), default=NORMAL, choices=PRIORITY_CHOICES)
-    request_at = models.DateTimeField(_("request at"), auto_now_add=True, blank=True)
-    send_at = models.DateTimeField(_("send_at"), blank=True, null=True)
+    request_at = models.DateTimeField(_("request at"), default=datetime.now, blank=True)
+    send_at = models.DateTimeField(_("send at"), blank=True, null=True)
+    create_at = models.DateTimeField(_("create at"), auto_now_add=True)
